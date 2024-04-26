@@ -1,1 +1,3 @@
-# Survival_Analysis_Course
+# MATH 284/FMPH 291 Survival Analysis Supplementary Learing Materials
+
+The repository contains supplementary learning materials for MATH 284/FMPH 291 Survival Analysis at UCSD. Please contact Yuyao Wang at yuw079@ucsd.edu if you have any suggestions or feedback about the repository, or if you have found any additional learning resources that were helpful. Your feedback is greatly appreciated and will help improve this repository to better facilitate learning!

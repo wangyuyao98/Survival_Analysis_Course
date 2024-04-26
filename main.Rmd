@@ -1,0 +1,83 @@
+---
+title: "MATH 284/FMPH 291 Survival Analysis  Supplementary Learing Materials"
+author: "Yuyao Wang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Tutorial
+
+Here is the link of a tutorial for survival analysis in R by Emily C. Zabor:
+[https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#Part_1:_Introduction_to_Survival_Analysis](https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html#Part_1:_Introduction_to_Survival_Analysis)
+
+Part 1 in the above tutorial includes creating survival objects and curve, Kaplan-Meier plots, Estimating x-year survival, estimating median survival time, comparing survival times between groups (using log-rank test), and Cox regression model.
+
+Below are some additional material for different topics.
+
+
+
+
+# Kaplan-Meier Curve
+
+The tutorial uses the '\texttt{ggsurvfit}' R package for doing Kaplan-Meier plots. Alternatively, survival plots can be created using base R or the '\texttt{survminer}' package.
+For example, below is an example of fiting KM curves for the two sex groups using the ‘lung’ data set from the '\texttt{survival}’ R package. You may find more details of the usage of the functions (for example how to add confidence intervals) by checking the R document for \texttt{survfit()} and \texttt{plot.survfit()}.
+
+```{r r1_KM}
+# Load the survival package
+library(survival)
+# Fit the Kaplan-Meier model stratified by sex
+# The lung dataset is automatically available after loading the survival package
+km_fit <- survfit(Surv(time, status) ~ sex, data = lung)
+# Plotting the Kaplan-Meier curves for two sex groups
+plot(km_fit, main = "Kaplan-Meier Survival Curves by Sex",
+        xlab = "Days", ylab = "Survival Probability", col = c(1, 2), lty = 1:2)
+# Adding a legend to the plot
+legend("topright", legend = c("Male", "Female"), col = c(1, 2), lty = 1:2)
+```
+
+
+
+
+# Log-rank test
+
+The function \texttt{survdiff()} used in the above tutorial for comparing survival times between groups is a function that conduct G-rho family tests. The default \texttt{rho=0}, which corresponds to log-rank test. More details can be found in the R documentation of this package.
+An alternative way of doing logrank test is using the score test for coxph score test. Try the code below, and you will find the two approaches gives exactly the same results! 
+
+BTW, \texttt{survdiff()} does not handle left truncated data, but `coxph()` can properly handle it by specifying the survival object to be `Surv(Q,X,Delta)`, where Q is the left truncation time, X is the censored event time, and Delta is the event indicator.
+
+```{r r_longrank}
+# logrank test using G^\rho test with rho = 0
+logrank.1 = survdiff(Surv(time, status) ~ sex, data = lung)
+print(logrank.1)
+
+# logrank test using coxph score test
+coxphfit = coxph(Surv(time, status) ~ sex, data = lung)
+summary(coxphfit)
+```
+
+
+
+
+
+
+
+# The dual between estimating T distribution and estimating C distribution
+
+The observed censored event time $X = \min(T,C)$ not only contains information of the event time $T$, but also information of the censoring time $C$. The even indicator $\Delta = I(T<C)$. In other words, when $\Delta = 1$, $X = T$; when $\Delta = 0$, $X = C$. 
+
+When we focus on estimating $T$ distribution, $T$ is censored by $C$, we construct survival object using `Surv(X, delta)`. When we focus on estimating $C$ distribution, $C$ can be viewed as censored by $T$. With this point of view think about how can we construct the survival object.
+
+
+
+
+
+# Notes on the exponenetial model and weibull model fitted using `survreg()`
+
+The location-scale parameterization of a Weibull distri- bution found in survreg is not the same as the parameterization of rweibull. See the Example for `survreg()` and the chunk for `survreg.distributions` in ‘\texttt{survival}’ R package documentation for more details on how to interpret the outputs.
+
