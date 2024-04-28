@@ -1734,8 +1734,8 @@ rweibull. See the Example for <code>survreg()</code> and the chunk for
 more details on how to interpret the outputs.</p>
 <p>When fitting an exponential model using
 <code>fit = survreg(..., dist = &quot;exponential&quot;)</code>,
-<code>1/exp(fit$icoef)</code> is the <code>rexp</code> rate parameter.
-Try the exmaple below.</p>
+<code>1/exp(fit$icoef)</code> correspond to the rate parameter in
+<code>rexp()</code>. Try the example below.</p>
 <pre class="r"><code>n=10000
 lambda = 3
 TT = rexp(n, rate = lambda)
@@ -1748,7 +1748,7 @@ dat = data.frame(X = X, delta = delta)
 fit = survreg(Surv(X, delta)~1, data = dat, dist = &quot;exponential&quot;)
 1/exp(fit$icoef)</code></pre>
 <pre><code>## (Intercept) 
-##    3.033651</code></pre>
+##    3.034244</code></pre>
 </div>
 
 
