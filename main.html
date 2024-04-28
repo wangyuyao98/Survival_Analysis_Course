@@ -11,7 +11,7 @@
 
 <meta name="author" content="Yuyao Wang" />
 
-<meta name="date" content="2024-04-26" />
+<meta name="date" content="2024-04-28" />
 
 <title>MATH 284/FMPH 291 Survival Analysis Supplementary Learing Materials</title>
 
@@ -1630,7 +1630,7 @@ pre code {
 <h1 class="title toc-ignore">MATH 284/FMPH 291 Survival Analysis
 Supplementary Learing Materials</h1>
 <h4 class="author">Yuyao Wang</h4>
-<h4 class="date">2024-04-26</h4>
+<h4 class="date">2024-04-28</h4>
 
 </div>
 
@@ -1727,11 +1727,28 @@ how can we construct the survival object.</p>
 <div id="notes-on-the-exponenetial-model-and-weibull-model-fitted-using-survreg" class="section level1">
 <h1>Notes on the exponenetial model and weibull model fitted using
 <code>survreg()</code></h1>
-<p>The location-scale parameterization of a Weibull distri- bution found
-in survreg is not the same as the parameterization of rweibull. See the
-Example for <code>survreg()</code> and the chunk for
+<p>The location-scale parameterization of a Weibull distribution found
+in <code>survreg</code> is not the same as the parameterization of
+rweibull. See the Example for <code>survreg()</code> and the chunk for
 <code>survreg.distributions</code> in ‘’ R package documentation for
 more details on how to interpret the outputs.</p>
+<p>When fitting an exponential model using
+<code>fit = survreg(..., dist = &quot;exponential&quot;)</code>,
+<code>1/exp(fit$icoef)</code> is the <code>rexp</code> rate parameter.
+Try the exmaple below.</p>
+<pre class="r"><code>n=10000
+lambda = 3
+TT = rexp(n, rate = lambda)
+C = runif(n, 1, 2)
+X = pmin(TT,C)
+delta = as.numeric(TT&lt;C)
+
+dat = data.frame(X = X, delta = delta)
+
+fit = survreg(Surv(X, delta)~1, data = dat, dist = &quot;exponential&quot;)
+1/exp(fit$icoef)</code></pre>
+<pre><code>## (Intercept) 
+##    3.033651</code></pre>
 </div>
 
 

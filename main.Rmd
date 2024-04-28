@@ -3,6 +3,7 @@ title: "MATH 284/FMPH 291 Survival Analysis  Supplementary Learing Materials"
 author: "Yuyao Wang"
 date: "`r Sys.Date()`"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -79,5 +80,28 @@ When we focus on estimating $T$ distribution, $T$ is censored by $C$, we constru
 
 # Notes on the exponenetial model and weibull model fitted using `survreg()`
 
-The location-scale parameterization of a Weibull distri- bution found in survreg is not the same as the parameterization of rweibull. See the Example for `survreg()` and the chunk for `survreg.distributions` in ‘\texttt{survival}’ R package documentation for more details on how to interpret the outputs.
+The location-scale parameterization of a Weibull distribution found in `survreg` is not the same as the parameterization of rweibull. See the Example for `survreg()` and the chunk for `survreg.distributions` in ‘\texttt{survival}’ R package documentation for more details on how to interpret the outputs.
+
+When fitting an exponential model using `fit = survreg(..., dist = "exponential")`, `1/exp(fit$icoef)` is the `rexp` rate parameter. Try the exmaple below.
+
+```{r r_survreg_exp}
+n=10000
+lambda = 3
+TT = rexp(n, rate = lambda)
+C = runif(n, 1, 2)
+X = pmin(TT,C)
+delta = as.numeric(TT<C)
+
+dat = data.frame(X = X, delta = delta)
+
+fit = survreg(Surv(X, delta)~1, data = dat, dist = "exponential")
+1/exp(fit$icoef)
+```
+
+
+
+
+
+
+
 
