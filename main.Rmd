@@ -3,9 +3,9 @@ title: "MATH 284/FMPH 291 Survival Analysis  Supplementary Learing Materials"
 author: "Yuyao Wang"
 date: "`r Sys.Date()`"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -101,7 +101,131 @@ fit = survreg(Surv(X, delta)~1, data = dat, dist = "exponential")
 
 
 
+# Cox regression
+
+We will use the `lung` data set in the `survival` R package as an example.
+
+```{r coxph_data}
+summary(lung)
+```
+
+## Fitting the model
+
+Try whether you get the same result if you change the data type for `sex` into factor.
+How to interpret the results when using `sex` as a continuous variable and when using `sex` as a factor?
+
+```{r coxph}
+# lung$sex <- as.factor(lung$sex)  
+coxfit = coxph(Surv(time, status) ~ sex, data = lung)
+coxfit
+
+ss = summary(coxfit)
+ss
+
+# Extract the coefficient 
+coef(coxfit)
+# or
+coxfit$coefficients
+
+# Extract the coefficients and p-value from Wald test
+coef(ss)
+# or
+ss$coefficients
+```
 
 
+## Prediction
 
+Note that when using `basehaz()` to get the estimator of cumulative baseline hazard, one should use the argument `center = FALSE` in order to get the estimate for the cumulative baseline hazard function $\Lambda_0(t)$ in the slides. See the example below.
+
+When using `center = FALSE` in `basehaz()`, one need to further center the covariate values when using the formula:
+
+$$\hat S(t|Z) = e^{-\hat\Lambda_0(t) e^{\hat\beta^\top Z}}.$$
+
+See the example below.
+
+```{r coxph_predict}
+coxfit = coxph(Surv(time, status) ~ ph.karno, data = lung)
+coxfit
+
+ph.karno.new = 75
+
+## Compute the baseline hazard
+baseh = basehaz(coxfit, center = FALSE)
+beta = coef(coxfit)
+
+baseh_centerT = basehaz(coxfit, center = TRUE)
+
+newdat = data.frame(time = baseh$time, 
+                    status = 1, 
+                    ph.karno = ph.karno.new)
+                 
+pred = predict(coxfit, newdata = newdat, type = "survival", se.fit = TRUE)
+pred_surv  = pred$fit
+# To see more usage of the function `prediction()` for `coxph` object, try the following.
+# ?predict.coxph
+
+# Another method - Compute the estimates from `beta` and `baseh`
+# sex = 1 -> to the baseline survival, since sex = 1 is the reference group
+pred2_surv_stepf <- stepfun(baseh$time, c(1, exp(-baseh$hazard*exp(beta*ph.karno.new))))
+pred3_surv_stepf <- stepfun(baseh_centerT$time, c(1, exp(-baseh_centerT$hazard*exp(beta*ph.karno.new))))
+pred4_surv_stepf <- stepfun(baseh_centerT$time, c(1, exp(-baseh_centerT$hazard*exp( beta*(ph.karno.new - mean(lung$ph.karno, na.rm = TRUE)) ))))
+
+## Plot out the step function for the estimated survival curve
+pred_surv_stepf <- stepfun(newdat$time, c(1,pred_surv))
+plot(pred_surv_stepf, do.points = FALSE, col = 1, lty = 1,
+     main = "Predicted survival curves",
+     xlab = "Days", ylab = "Survival probability")
+# ?plot.stepfun  # for more usage of plotting the `stepfun` object
+plot(pred2_surv_stepf, do.points = FALSE, col = 2, lty = 2, add = TRUE)
+plot(pred3_surv_stepf, do.points = FALSE, col = 3, lty = 3, add = TRUE)
+plot(pred4_surv_stepf, do.points = FALSE, col = 4, lty = 4, add = TRUE)
+legend("topright", 
+       legend = c("predict.coxph", "center = FALSE, orginal Z", "center = TRUE, orginal Z", "center = TRUE, centered Z"),
+       col = 1:4, lty = 1:4,
+       bty = "n")
+```
+
+See the R documentation for `predict.coxph()` for details about how to do prediction.
+
+
+Another way to do prediction is using the `hasehaz(.., newdata)`.
+
+```{r coxph_predict2}
+newdat = data.frame(ph.karno = ph.karno.new)
+cumhazard = basehaz(coxfit, newdata = newdat)
+
+pred5_surv_stepf <- stepfun(baseh$time, c(1, exp(-cumhazard$hazard)))
+
+plot(pred_surv_stepf, do.points = FALSE, col = 1, lty = 1,
+     main = "Predicted survival curves",
+     xlab = "Days", ylab = "Survival probability")
+plot(pred5_surv_stepf, do.points = FALSE, col = 5, lty = 5, add = TRUE)
+legend("topright", 
+       legend = c("predict.coxph", "basehaz"),
+       col = c(1,5), lty = c(1,5),
+       bty = "n")
+
+
+# To predict multiple survival curves at once
+ph.karno.new = c(60, 75, 90)
+newdat = data.frame(ph.karno = ph.karno.new)
+cumhazard = basehaz(coxfit, newdata = newdat)
+colnames(cumhazard)
+
+surv_stepf <- stepfun(cumhazard$time, c(1, exp(-cumhazard[,1])))
+plot(surv_stepf, do.points = FALSE, col = 1, lty = 1,
+     main = "Predicted survival curves",
+     xlab = "Days", ylab = "Survival probability")
+k = nrow(newdat)
+for(i in 2:k){
+    surv_stepf <- stepfun(cumhazard$time, c(1, exp(-cumhazard[,i])))
+    plot(surv_stepf, do.points = FALSE, col = i, lty = i, add = TRUE)
+}
+legend("topright", 
+       legend = paste("ph.karno =",  ph.karno.new),
+       col = 1:k, lty = 1:k,
+       bty = "n")
+
+```
 
