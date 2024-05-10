@@ -156,6 +156,7 @@ beta = coef(coxfit)
 
 baseh_centerT = basehaz(coxfit, center = TRUE)
 
+
 newdat = data.frame(time = baseh$time, 
                     status = 1, 
                     ph.karno = ph.karno.new)
@@ -167,7 +168,7 @@ pred_surv  = pred$fit
 
 # Another method - Compute the estimates from `beta` and `baseh`
 # sex = 1 -> to the baseline survival, since sex = 1 is the reference group
-pred2_surv_stepf <- stepfun(baseh$time, c(1, exp(-baseh$hazard*exp(beta*ph.karno.new))))
+pred2_surv_stepf <- stepfun(baseh$time, c(1,exp(-baseh$hazard*exp(beta*ph.karno.new))))
 pred3_surv_stepf <- stepfun(baseh_centerT$time, c(1, exp(-baseh_centerT$hazard*exp(beta*ph.karno.new))))
 pred4_surv_stepf <- stepfun(baseh_centerT$time, c(1, exp(-baseh_centerT$hazard*exp( beta*(ph.karno.new - mean(lung$ph.karno, na.rm = TRUE)) ))))
 
@@ -209,7 +210,7 @@ legend("topright",
 
 # To predict multiple survival curves at once
 ph.karno.new = c(60, 75, 90)
-newdat = data.frame(ph.karno = ph.karno.new)
+newdat = data.frame(ph.karno = ph.karno.new, sex = c(1,2,1))
 cumhazard = basehaz(coxfit, newdata = newdat)
 colnames(cumhazard)
 
