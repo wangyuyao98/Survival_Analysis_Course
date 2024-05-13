@@ -1,0 +1,45 @@
+---
+title: "HW format"
+author: "Your name"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Homework format
+
+The homework format specified at the begining of the homework assignment: "Write your solutions, answers and results etc. in complete sentences, clearly lay out your setup, background etc. in the main part, and append program codes in the back; all needs to be turned in."
+
+The following is simple way you can do it without the need to specify names for code chunks.
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+\newpage
+## Appendix: Code
+
+```{r, echo=TRUE, eval=FALSE, ref.label=knitr::all_labels()}
+```
