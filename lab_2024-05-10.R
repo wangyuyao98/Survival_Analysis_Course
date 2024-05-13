@@ -4,7 +4,7 @@ library(survival)
 library(timereg)
 
 
-## pbc data from timereg package
+## pbc data from survival package
 ?pbc
 
 
@@ -38,7 +38,7 @@ summary(dat)
 covs.hist = c("age", "bili", "albumin", "protime")
 par(mfrow=c(2,2))
 for(i in 1:length(covs.hist)){
-    hist(dat[,covs.hist[i]], xlab = covs.hist[i], main = "")
+  hist(dat[,covs.hist[i]], xlab = covs.hist[i], main = "")
 }
 
 
@@ -52,7 +52,7 @@ summary(dat)
 covs.hist = c("age", "logBilirubin", "logAlbumin", "logProtime")
 par(mfrow=c(2,2))
 for(i in 1:length(covs.hist)){
-    hist(dat[,covs.hist[i]], xlab = covs.hist[i], main = "")
+  hist(dat[,covs.hist[i]], xlab = covs.hist[i], main = "")
 }
 
 
@@ -88,14 +88,21 @@ summary(fit_multi)
 
 ## Compute the R-square meansure
 library(CoxR2)
-coxr2(fit_multi)
+coxr2fit = coxr2(fit_multi)
+coxr2fit$rsq
+
+
+
+
+
+
 
 
 ## Check the PH assumption using cumulative martingale residuals
 # Refit the Cox model with timereg:cox.aalen, which has cox regression as a special case.
 library(timereg)
 fit_multi2 <- cox.aalen(Surv(time,status)~prop(sex)+prop(age)+prop(edema)+
-                            prop(logBilirubin)+prop(logAlbumin)+prop(logProtime),
+                          prop(logBilirubin)+prop(logAlbumin)+prop(logProtime),
                         data = dat)
 fit_multi2
 
@@ -107,12 +114,17 @@ plot(fit_multi2, score = TRUE)
 
 
 
+
+
+
+
+
 ### Fit a stratified Cox-PH model with strata defined by edema
 # Note that edema only takes 3 values: 0, 0.5, 1
 summary(as.factor(dat$edema))
 
 fit_strata <- coxph(Surv(time,status)~sex+age+strata(edema)+logBilirubin+logAlbumin+logProtime,
-                  data = dat)
+                    data = dat)
 fit_strata    
 
 
@@ -193,6 +205,6 @@ head(dat)
 # Fit the Cox model
 fit_3piece = coxph(as.formula(paste("Surv(start, stop, delta)~",
                                     paste(c(covsname1, covsname2, covsname3), collapse = "+"))),
-                   data = dat_psd, id = dat_psd$id)
+                   data = dat_psd, id = id)
 
 fit_3piece
